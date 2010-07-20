@@ -1,7 +1,6 @@
 (in-package :nass.arch.x86oids)
 
-(in-suite* :nisp)
-(in-suite* :nass :in :nisp)
+(in-suite* :nass)
 (in-suite* root :in :nass)
 ;;; FIXME: Are there better longer named forms of these?
 ;;; These are taken directly from the manuals and specifications.
@@ -427,6 +426,10 @@ For now we return :bigger and :smaller."
           (ash (encode-reg-bits source) 3)
           (encode-reg-bits destination)))
 
+(defun reg-indirect (destination source)
+  (declare (register-indirect source))
+  (logior (ash (encode-reg-bits (register-indirect source)) 3)
+          (encode-reg-bits destination)))
 
 
 ;;; Ugly first shot at MOV. This "works" assuming we are doing reg-reg.

@@ -43,13 +43,17 @@
                      ,(format nil "ndisasm ~A" path))
            `(error "Requires trivial-shell!"))))
 
-(defun nasm-string (asm-instructions &key (file *nasm-test-file-path*))
+(defun nasm-string (asm-instructions &key (file *nasm-test-file-path*)
+                    (format "-fbin"))
   (declare (string asm-instructions))
   (with-open-file (s file
                      :direction :output
                      :if-exists :supersede
                      :if-does-not-exist :create)
     (princ asm-instructions s))
+  (trivial-shell:shell-command (format nil "nasm ~A -l ~A.listing ~A -o ~A.out && cat ~A.listing" format file file file file)))
+
+(defun nasm-file (file)
   (trivial-shell:shell-command (format nil "nasm -fbin -l ~A.listing ~A -o ~A.out && cat ~A.listing" file file file file)))
 
 (defun gas-string (asm-instructions &key (file *gas-test-file-path*))

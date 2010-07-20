@@ -20,3 +20,5 @@
     encoded format, until then aligouri in #qemu suggests:
     : mmap(); /* some file */
     : addr = mmap() ((void (*)(void))addr)();
+
+    Nass.elf is making some progress. [2010-05-22 Sat 17:56]

@@ -65,19 +65,49 @@ You can do (concatenate 'bitstring ....) as well."
   (make-array n :element-type 'bit :initial-element 1))
 
 
-(defun extract-bitstring (x &rest integers))
-
-(defgeneric %extract-bitstring (x integers)
+(defgeneric extract-bitstring (x &rest integers)
   (declare (optimize (speed 3) (safety 1) (debug 1)))
   (:documentation "Extract bits from X.
 
 concat results if more then one INTEGERS are supplied."))
 
-(defmethod %extract-bitstring ((bitstring simple-bit-vector) (position integer))
-  (assert (< position (length bitstring)))
-  (bitstring (sbit bitstring (- (length bitstring) position 1))))
+(defmethod extract-bitstring ((integer integer) &rest positions)
+  (let ((result (make-bitstring (length positions))))
+    (loop for i from 0
+       for position in positions
+       do (setf (sbit result i)
+                (ldb (byte 1 position) integer)))
+    result))
 
-(defmethod %extract-bitstring ((integer integer) (position integer))
-  (bitstring (ldb (byte 1 position) integer)))
+(defmethod extract-bitstring ((bitstring simple-bit-vector) &rest positions)
+  (let ((result (make-bitstring (length positions))))
+    (loop for i from 0
+       for position in positions
+       do (setf (sbit result i)
+                (sbit bitstring (- (length bitstring) position 1))))
+    result))
+#+ ()
+(defmethod (setf extract-bitstring) (new-value (integer integer) &rest positions)
+  (check-type new-value bit)
+  (assert (length= 1 positions))
+  (print new-value *trace-output*)
+  (print integer *trace-output*)
+  (print positions *trace-output*)
+
+  (print integer *trace-output*))
+#+ ()
+(let ((a 11))
+  (setf (extract-bitstring a 1) 1)
+  a)
+
+#+ ()
+(let ((z 2))
+  (setf (extract-bitstring z 3) 0)
+  z)
+
+#+ ()
+(defsetf extract-bitstring (integer &rest positions) (new-value)
+  `(setf (ldb (byte 1 (car ',positions)) ,integer) ,new-value))
+
 
 ;;; END

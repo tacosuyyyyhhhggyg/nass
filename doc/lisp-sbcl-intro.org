@@ -118,6 +118,9 @@ those are unix like but no promises.
     letters/going backwards in the command prompt works. There is a pretty
     good set of [[http://utopia.knoware.nl/~hlub/uck/rlwrap/rlwrap.html][documentation]].
 
+*** configure sbcl
+    The main sbcl configuration file is at =~/.sbclrc=
+
 
 * Footnotes
 
