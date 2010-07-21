@@ -67,7 +67,20 @@ ambigouity from C types to our lisp description."))
   (:use :cl :nutils.assert))
 
 (defpackage #:nass.x86oid.types
-  (:use :cl))
+  (:use :cl)
+  (:export #:r8
+           #:r16
+           #:r32
+           #:r64
+           #:mm
+           #:xmm
+           #:segment-register
+           #:eee
+           #:x87-stack-register
+           #:mod-rem-r/m-register
+           #:segment-override-prefix-codes
+           #:x86-register
+           #:immediate))
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)
