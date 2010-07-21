@@ -37,44 +37,6 @@
                            :operands ',operand
                            :documentation ,docstring
                            ,@remaining-args)))
-#|
-(instruction-operands-count (defop foo #x00 ((E f))
-   "look a test"
-   :categories '(:binary)))
-
-(defop nop #x90 () "No operation.")
-(defop nop #x90 () "No operation."
-       :prefix #xf3)
-
-(defop nop #x1f () "No operation."
-       :register-opcode-field 0
-       :prefix #x0f)
-
-(defop nop #x0f () "No operation."
-       :prefix #x0d)
-
-(deftype r8 ()
-  "8 bit address locations on 16 bit."
-  '(member :al :cl :dl :bl :ah :ch :dh :bh))
-
-(deftype r16 ()
-  "16 bit registers."
-  '(member :ax :cx :dx :bx :sp :bp :si :di))
-
-
-(deftype r32 ()
-  "32 bit registers."
-  '(member :eax :ecx :edx :ebx :esp :ebp :esi :edi))
-
-(deftype r64 ()
-  "64 bit registers."
-  '(member :rax :rcx :rdx :rbx :rsp :rbp :rsi :rdi
-    :r8 :r9 :r10 :r11 :r12 :r13 :r14 :r15))
-
-(deftype x86-register ()
-  '(or r8 r16 r32 r64))
-SB-PRETTY::PPRINT-DISPATCH-ENTRY
-|#
 
 (defvar +x86-mnemonics+
   (make-hash-table :test 'eq))
@@ -92,6 +54,21 @@ TEST-FUNCTION is a function of one argument, that of the prospective
 arguments to check types on that returns t or nil if those arguements are
 of a valid type."
   (type (assert-value-supplied))
-  (test-function nil (or null nutils:function-designator))
+  (test-function nil :type (or null nutils:function-designator))
   (priority 0 :type fixnum)
   (function (assert-value-supplied) :type nutils:function-designator))
+
+
+(defun dispatch-entry-equal (entry1 entry2)
+  "Compare two entries based on required type alone."
+  (declare (dispatch-entry entry1 entry2))
+  (equal (dispatch-entry-type entry1)
+         (dispatch-entry-type entry2)))
+
+
+(defun sortf-type-dispatch-entries (name dispatch-table)
+  "Sort functions under NAME in DISPATCH-TABLE by priority."
+  (setf (gethash name dispatch-table)
+        (sort (gethash name dispatch-table)
+              #'> :key #'dispatch-entry-priority)))
+
