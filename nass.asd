@@ -25,6 +25,7 @@
                        (:module :x86oid
                                 :components
                                 (;(:file "mod-reg-rm-types")
+                                 (:file "types")
                                  (:file "opcodes")))
                        (:module :i8086
                                 :components
