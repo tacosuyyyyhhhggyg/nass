@@ -93,7 +93,7 @@ ambigouity from C types to our lisp description."))
   (:documentation "Working with the ARM manual. Nothing concrete at all
   here yet and may not be for several months. [2010-05-21 Fri 12:59]"))
 
-(defpackage #:nass.x86.opcodes
+(defpackage #:nass.x86oid.opcodes
   (:use :cl))
 
 (defpackage #:nass.elf

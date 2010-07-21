@@ -14,9 +14,10 @@
             :components
             ((:file "global-state")
              (:file "c-types")
+             (:file "instruction")
             ; (:file "abstract")
              (:module :arch
-                      :serial t
+                      :depends-on ("instruction")
                       :components
                       ((:module :4004
                                 :components
@@ -26,7 +27,7 @@
                                 :components
                                 (;(:file "mod-reg-rm-types")
                                  (:file "types")
-                                 (:file "opcodes")))
+                                 (:file "opcodes" :depends-on ("types"))))
                        (:module :i8086
                                 :components
                                 ((:file "init-i8086")))))))
