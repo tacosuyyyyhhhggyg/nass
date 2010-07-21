@@ -2,7 +2,7 @@
 
 (defstruct instruction
   (name (assert-value-supplied) :type symbol)
-  (primary-opcode (assert-value-supplied) :type (mod 256))
+  (primary-opcode 0 :type (mod 256))
 
   (extension nil :type (or null keyword))
   (writer nil :type (or null function))

@@ -107,7 +107,7 @@ ambigouity from C types to our lisp description."))
   here yet and may not be for several months. [2010-05-21 Fri 12:59]"))
 
 (defpackage #:nass.x86oid.opcodes
-  (:use :cl))
+  (:use :cl :nass.x86oid.types))
 
 (defpackage #:nass.elf
   (:use :cl :nass.util :eos))
