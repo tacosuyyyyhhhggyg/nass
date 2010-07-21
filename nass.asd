@@ -14,7 +14,7 @@
             :components
             ((:file "global-state")
              (:file "c-types")
-             (:file "abstract")
+            ; (:file "abstract")
              (:module :arch
                       :serial t
                       :components
@@ -24,7 +24,8 @@
                        #+ () (:file "x86oids")
                        (:module :x86oid
                                 :components
-                                ((:file "mod-reg-rm-types")))
+                                (;(:file "mod-reg-rm-types")
+                                 (:file "opcodes")))
                        (:module :i8086
                                 :components
                                 ((:file "init-i8086")))))))

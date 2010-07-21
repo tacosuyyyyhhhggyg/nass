@@ -63,6 +63,9 @@ ambigouity from C types to our lisp description."))
            #:opcode-mixin
            #:define-assembly-class))
 
+(defpackage #:nass.instruction
+  (:use :cl :nutils.assert))
+
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)
@@ -87,6 +90,9 @@ ambigouity from C types to our lisp description."))
   (:use :cl :nutils)
   (:documentation "Working with the ARM manual. Nothing concrete at all
   here yet and may not be for several months. [2010-05-21 Fri 12:59]"))
+
+(defpackage #:nass.x86.opcodes
+  (:use :cl))
 
 (defpackage #:nass.elf
   (:use :cl :nass.util :eos))
