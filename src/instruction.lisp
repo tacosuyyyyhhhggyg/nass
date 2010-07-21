@@ -72,3 +72,33 @@ of a valid type."
         (sort (gethash name dispatch-table)
               #'> :key #'dispatch-entry-priority)))
 
+(defun tuncall (name table &rest args)
+  (declare (optimize (speed 3) (safety 0))
+           (dynamic-extent args))
+  (apply (the function (loop for entry in (gethash name table)
+                          when (typep args (dispatch-entry-type entry))
+                          return (dispatch-entry-function entry)))
+         args))
+
+(defmacro define-type-dispatch (lambdalist &body types-actions)
+  (let ((args (gensym "ARGS")))
+   `(lambda (&rest ,args)
+      (destructuring-bind ,lambdalist ,args
+        (etypecase ,args
+          ,@(mapcar (lambda (arg)
+                      (if (consp (car arg))
+                        (cons (build-cons-type (car arg))
+                              (cdr arg))
+                        arg))
+                    types-actions))))))
+
+(defun build-cons-type (list)
+  (if list
+      (if (eql 'null (car list))
+          'null
+          (list 'cons (car list) (build-cons-type (cdr list))))
+      '*))
+
+
+
+
