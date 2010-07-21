@@ -38,8 +38,7 @@
                            :documentation ,docstring
                            ,@remaining-args)))
 
-(defvar +x86-mnemonics+
-  (make-hash-table :test 'eq))
+
 
 (defstruct dispatch-entry
   "Contains required TYPE and PRIORITY that FUNCTION is called.
@@ -57,7 +56,6 @@ of a valid type."
   (test-function nil :type (or null nutils:function-designator))
   (priority 0 :type fixnum)
   (function (assert-value-supplied) :type nutils:function-designator))
-
 
 (defun dispatch-entry-equal (entry1 entry2)
   "Compare two entries based on required type alone."
@@ -80,6 +78,14 @@ of a valid type."
                           return (dispatch-entry-function entry)))
          args))
 
+(defun build-cons-type (list)
+  (if list
+      (if (eql 'null (car list))
+          'null
+          (list 'cons (car list) (build-cons-type (cdr list))))
+      '*))
+
+
 (defmacro define-type-dispatch (lambdalist &body types-actions)
   (let ((args (gensym "ARGS")))
    `(lambda (&rest ,args)
@@ -91,14 +97,5 @@ of a valid type."
                               (cdr arg))
                         arg))
                     types-actions))))))
-
-(defun build-cons-type (list)
-  (if list
-      (if (eql 'null (car list))
-          'null
-          (list 'cons (car list) (build-cons-type (cdr list))))
-      '*))
-
-
 
 
