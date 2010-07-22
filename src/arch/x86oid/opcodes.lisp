@@ -57,6 +57,14 @@ will return the correct bit sequence as an integer.")
   ((r16) (list (logior #x40 (encode-reg-bits op1))))
   ((r32) (list #x66 (logior #x40 (encode-reg-bits op1)))))
 
+(define-x86oid-mnemonic push (op1)
+  ((r16) (list (logior #x50 (encode-reg-bits op1))))
+  ((r32) (list #x66 (logior #x50 (encode-reg-bits op1)))))
+
+(define-x86oid-mnemonic pop (op1)
+  ((r16) (list (logior #x58 (encode-reg-bits op1))))
+  ((r32) (list #x66 (logior #x58 (encode-reg-bits op1)))))
+
 (define-x86oid-mnemonic int (immediate)
   ((immediate) (list #xCD immediate)))
 (defun encode-reg-bits (reg-name)
