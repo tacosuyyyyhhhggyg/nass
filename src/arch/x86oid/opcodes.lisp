@@ -57,6 +57,8 @@ will return the correct bit sequence as an integer.")
   ((r16) (list (logior #x40 (encode-reg-bits op1))))
   ((r32) (list #x66 (logior #x40 (encode-reg-bits op1)))))
 
+(define-x86oid-mnemonic int (immediate)
+  ((immediate) (list #xCD immediate)))
 (defun encode-reg-bits (reg-name)
   "Compute 3 bit number corresponding to REG-NAME."
   (declare (nass.x86oid.types::mod-rem-r/m-register reg-name)
@@ -67,3 +69,11 @@ will return the correct bit sequence as an integer.")
   (declare (optimize (speed 3) (safety 3)))
   (apply (the function (nass.instruction::instruction-writer (gethash name +x86-mnemonics+)))
          operands))
+
+
+(defmacro asm ((arch) &body body)
+  (ecase arch
+    (:x86oid `(list ,@(mapcar (lambda (instruction)
+                        `(nass.x86oid.opcodes::encode-instruction ,(nutils:make-keyword (car instruction)) ,@(cdr instruction)))
+                      body)))))
+
