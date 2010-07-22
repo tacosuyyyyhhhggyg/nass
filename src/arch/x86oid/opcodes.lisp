@@ -53,6 +53,17 @@ will return the correct bit sequence as an integer.")
                       ,lambdalist ,@types-action)
           )))
 
+;;;
+;;; syntax sorting stuff...
+;;;
+(defun spec-type-v-p (operands)
+  "True if an operand has :v specified.
+
+:v means there is an operand size prefix and it toggles between r16 and
+r32 for 32bit mode."
+  (declare (list operands))
+  (find :v operands :key #'cdr))
+
 ;;; mod-reg-r/m stuff
 (defun reg-reg (destination source)
   (declare (mod-rem-r/m-register destination source))
