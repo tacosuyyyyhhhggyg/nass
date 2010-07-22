@@ -75,6 +75,12 @@ will return the correct bit sequence as an integer.")
                       ,lambdalist ,@types-action)
           )))
 
+(defun encode-reg-bits (reg-name)
+  "Compute 3 bit number corresponding to REG-NAME."
+  (declare (nass.x86oid.types::mod-rem-r/m-register reg-name)
+           (optimize (speed 3) (space 0)))
+  (mod (position reg-name (the simple-vector +register-list+)) 8))
+
 (define-x86oid-mnemonic nop ()
   (null (list #x90)))
 
@@ -96,11 +102,6 @@ will return the correct bit sequence as an integer.")
 
 (define-x86oid-mnemonic int (immediate)
   ((immediate) (list #xCD immediate)))
-(defun encode-reg-bits (reg-name)
-  "Compute 3 bit number corresponding to REG-NAME."
-  (declare (nass.x86oid.types::mod-rem-r/m-register reg-name)
-           (optimize (speed 3) (space 0)))
-  (mod (position reg-name (the simple-vector +register-list+)) 8))
 
 (defun encode-instruction (name &rest operands)
   (declare (optimize (speed 3) (safety 3)))
