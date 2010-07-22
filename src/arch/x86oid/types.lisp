@@ -57,7 +57,8 @@
              (:constructor make-register-indirect
                            (register &optional (segment :ds)))
              (:include segment))
-  (register :bx :type mod-rem-r/m-register))
+  (register :bx :type (member :bx :bp :si :di
+                              :ebx :ebp :esi :edi)))
 
 (defstruct (indirect-displacement
              (:include register-indirect)
@@ -70,7 +71,7 @@
              (:include register-indirect)
              (:constructor make-indirect-base
                            (register &optional (base :bx) (segment :ds))))
-  (base :bx :type (member :bx :bp)))
+  (base :bx :type (member :bx :bp :ebx :ebp)))
 
 (defstruct (indirect-base-displacement
              (:include indirect-base)

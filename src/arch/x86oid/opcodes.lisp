@@ -6,6 +6,13 @@
 (defvar +x86-mnemonics+
   (make-hash-table :test 'eq))
 
+(defun integer->little-octets (integer &key vectorp
+                               (size (ceiling (log (1+ integer) 256))))
+  "Convert an INTEGER to a list of octets in little endian order."
+  (assert (not vectorp) nil "VECTORP not implemented yet.")
+  (loop for i from 0 to (1- size)
+       collect (ldb (byte 8 (* 8 i)) integer)))
+
 ;;; OPTIMIZE: If anyone cares or thinks this is too slow: Put these in the
 ;;; order of expected use. The items closer to the front of this array
 ;;; will be looked up faster then the items at the end. So put the more
@@ -90,7 +97,7 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
      (let ((result 0))
        (setf (ldb (byte 3 19) result) (encode-reg-bits destination))
        (setf (ldb (byte 3 16) result) #b110)
-       #+ () (setf (ldb (byte 8 16) result)
+       (setf (ldb (byte 8 16) result)
                    (encode-displacement (displacement-location source) size))))
     ((cons (or r8 r16 r32 mm xmm eee segment-register) register-indirect)
      (logior #x00
@@ -167,6 +174,15 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
    (list #x03 (encode-reg-r/m destination source)))
   ((r32 (or memory r32))
    (list #x66 #x03 (encode-reg-r/m destination source))))
+
+(define-x86oid-mnemonic lodsb ()
+  ;; Loads the string at ds:si into al
+  (null (list #xac)))
+(define-x86oid-mnemonic lodsw ()
+  (null (list #xad)))
+(define-x86oid-mnemonic lodsd ()
+  (null (list #x66 #xAD)))
+
 
 (defun encode-instruction (name &rest operands)
   (declare (optimize (speed 3) (safety 3)))
