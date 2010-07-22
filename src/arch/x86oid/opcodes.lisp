@@ -6,6 +6,12 @@
 (defvar +x86-mnemonics+
   (make-hash-table :test 'eq))
 
+(defparameter +spec-types+
+  (nutils:plist-hash-table
+   `(:E gpr-or-memory
+        :G gpr))
+  "Used for type lookup from spec to lisp types.")
+
 (defun integer->little-octets (integer &key vectorp
                                (size (ceiling (log (1+ integer) 256))))
   "Convert an INTEGER to a list of octets in little endian order."
