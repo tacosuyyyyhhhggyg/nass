@@ -6,6 +6,35 @@
 (defvar +x86-mnemonics+
   (make-hash-table :test 'eq))
 
+(defstruct segment
+  (segment :ds :type segment-register))
+
+(defstruct (displacement
+             (:constructor make-displacement
+                           (location &optional (segment :ds)))
+             (:include segment))
+  (location 0 :type (mod 65536)))
+
+(defstruct (register-indirect
+             (:constructor make-register-indirect
+                           (register &optional (segment :ds)))
+             (:include segment))
+  (register :bx :type mod-rem-r/m-register))
+
+(defstruct (indirect-displacement
+             (:include register-indirect))
+  ;; have to manually do displacement...
+  (location 0 :type (mod 65536)))
+
+(defstruct (indirect-base
+             (:include register-indirect))
+  (base :bx :type (member :bx :bp)))
+
+(defstruct (indirect-base-displacement
+             (:include indirect-base))
+  ;; have to manually do displacement
+  (location 0 :type (mod 65536)))
+
 ;;; OPTIMIZE: If anyone cares or thinks this is too slow: Put these in the
 ;;; order of expected use. The items closer to the front of this array
 ;;; will be looked up faster then the items at the end. So put the more
