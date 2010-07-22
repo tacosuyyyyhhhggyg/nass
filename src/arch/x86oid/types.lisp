@@ -44,6 +44,35 @@
      :XMM8 :XMM9 :XMM10 :XMM11 :XMM12 :XMM13 :XMM14 :XMM15
      :cr8)))
 
+(defstruct segment
+  (segment :ds :type segment-register))
+
+(defstruct (displacement
+             (:constructor make-displacement
+                           (location &optional (segment :ds)))
+             (:include segment))
+  (location 0 :type (mod 65536)))
+
+(defstruct (register-indirect
+             (:constructor make-register-indirect
+                           (register &optional (segment :ds)))
+             (:include segment))
+  (register :bx :type mod-rem-r/m-register))
+
+(defstruct (indirect-displacement
+             (:include register-indirect))
+  ;; have to manually do displacement...
+  (location 0 :type (mod 65536)))
+
+(defstruct (indirect-base
+             (:include register-indirect))
+  (base :bx :type (member :bx :bp)))
+
+(defstruct (indirect-base-displacement
+             (:include indirect-base))
+  ;; have to manually do displacement
+  (location 0 :type (mod 65536)))
+
 (deftype segment-override-prefix-codes ()
   "Octets that override to a specific segment:
 
@@ -62,5 +91,19 @@ Segment names are cs ss ds es fs gs."
 
 (deftype immediate-octet (&optional (size 1))
   `(and immediate (nutils:octet ,size)))
+
+(deftype general-purpose-register ()
+  "Any valid general purpose register."
+  'mod-rem-r/m-register)
+
+(deftype gpr ()
+  "Short for `general-purpose-register'."
+  'general-purpose-register)
+
+(deftype memory ()
+  "valid memory locations only."
+  '(or displacement indirect-displacement indirect-base-displacement
+    register-indirect indirect-base))
+
 
 ;;; END

@@ -81,7 +81,16 @@ ambigouity from C types to our lisp description."))
            #:segment-override-prefix-codes
            #:x86-register
            #:immediate
-           #:immediate-octet))
+           #:immediate-octet
+           #:indirect-base-displacement
+           #:indirect-base
+           #:indirect-displacement
+           #:register-indirect
+           #:displacement
+           #:segment
+           #:memory
+           #:gpr
+           #:general-purpose-register))
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)
