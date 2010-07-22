@@ -90,7 +90,16 @@ ambigouity from C types to our lisp description."))
            #:segment
            #:memory
            #:gpr
-           #:general-purpose-register))
+           #:general-purpose-register
+           #:register-indirect-register
+           #:indirect-displacement-location
+           #:indirect-base-displacement-location
+           #:indirect-base-base
+           #:make-displacement
+           #:make-register-indirect
+           #:make-indirect-base
+           #:make-indirect-displacement
+           #:make-indirect-base-displacement))
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)

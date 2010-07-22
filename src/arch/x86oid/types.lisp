@@ -60,16 +60,23 @@
   (register :bx :type mod-rem-r/m-register))
 
 (defstruct (indirect-displacement
-             (:include register-indirect))
+             (:include register-indirect)
+             (:constructor make-indirect-displacement
+                           (location &optional (register :bx) (segment :ds))))
   ;; have to manually do displacement...
   (location 0 :type (mod 65536)))
 
 (defstruct (indirect-base
-             (:include register-indirect))
+             (:include register-indirect)
+             (:constructor make-indirect-base
+                           (register &optional (base :bx) (segment :ds))))
   (base :bx :type (member :bx :bp)))
 
 (defstruct (indirect-base-displacement
-             (:include indirect-base))
+             (:include indirect-base)
+             (:constructor make-indirect-base-displacement
+                           (location &optional (base :bx) (register :si)
+                                     (segment :ds))))
   ;; have to manually do displacement
   (location 0 :type (mod 65536)))
 
