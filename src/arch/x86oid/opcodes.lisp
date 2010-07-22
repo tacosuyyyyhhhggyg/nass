@@ -87,9 +87,9 @@ Doing this means reversing the order of the octets.
   (let ((size (1- (ash size -3))))
     (loop for i from size downto 0
        for opp from 0 to size
-       summing (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))
-       do (print (list i opp (* i 8) (ldb (byte 4 (* i 8)) displacement)
-                       (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))))
+       collecting (ldb (byte 8 (* i 8)) displacement)
+;       do (print (list i opp (* i 8) (ldb (byte 4 (* i 8)) displacement)
+ ;                      (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))))
        )))
 
 (defun encode-reg-r/m (destination source &optional (size 16))
@@ -97,6 +97,7 @@ Doing this means reversing the order of the octets.
 
 This is very hackish and really needs to be redone when the generic type
 dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
+  (declare (optimize (speed 3) (safety 1)))
   ;; Basically as is each "case" for a 16 bit machine is handled vie types
   ;; alone. This makes this one function very long and ugly... but right
   ;; now required if we are to avoid using clos in the assembler.
@@ -105,11 +106,8 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
      ;; Example:: ADD ax, ax
      (reg-reg destination source))
     ((cons mod-rem-r/m-register displacement)
-     (let ((result 0))
-       (setf (ldb (byte 3 19) result) (encode-reg-bits destination))
-       (setf (ldb (byte 3 16) result) #b110)
-       (setf (ldb (byte 8 16) result)
-                   (encode-displacement (displacement-location source) size))))
+     (cons (logior #b00110000 (encode-reg-bits destination))
+           (encode-displacement (displacement-location source) size)))
     ((cons (or r8 r16 r32 mm xmm eee segment-register) register-indirect)
      (logior #x00
              (ash (encode-reg-bits destination) 3)
@@ -128,10 +126,10 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
     ((cons (or r8 r16 r32 mm xmm eee segment-register) indirect-base)
      (logior
       (ash (encode-reg-bits destination) 3)
-      (ash (position (the (member :si :di) (register-indirect-register source))
-                     '(:si :di))
-           (position (the (member :bx :bp) (indirect-base-base source))
-                     '(:bx :bp)))))
+      (the fixnum (ash (position (the (member :si :di) (register-indirect-register source))
+                                 '(:si :di))
+                       (position (the (member :bx :bp) (indirect-base-base source))
+                                 '(:bx :bp))))))
     ((cons (or r8 r16 r32 mm xmm eee segment-register)
            indirect-base-displacement)
      (logior
@@ -139,10 +137,10 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
           #b10000000
           #b01000000)
       (ash (encode-reg-bits destination) 3)
-      (ash (position (the (member :si :di) (register-indirect-register source))
-                     '(:si :di))
-           (position (the (member :bx :bp) (indirect-base-base source))
-                     '(:bx :bp)))))
+      (the fixnum (ash (position (the (member :si :di) (register-indirect-register source))
+                                 '(:si :di))
+                       (position (the (member :bx :bp) (indirect-base-base source))
+                                 '(:bx :bp))))))
     ((cons (or indirect-base displacement
                indirect-displacement register-indirect
                indirect-base-displacement))
@@ -171,20 +169,28 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
 (define-x86oid-mnemonic int (immediate)
   ((immediate-octet) (list #xCD immediate)))
 
+(declaim (inline fl))
+(defun fl (&rest args)
+  "(F)latten (L)ist of ARGS.
+
+Shortcut function that is inlined as we use this often."
+  (declare (optimize (speed 3) (safety 0)))
+  (nutils:flatten args))
+
 (define-x86oid-mnemonic add (destination source)
   (((member :al) immediate-octet) (list #x04 source))
   (((or memory r8) r8)
-   (list #x00 (encode-reg-r/m source destination)))
+   (fl #x00 (encode-reg-r/m source destination)))
   (((or memory r16) r16)
-   (list #x01 (encode-reg-r/m source destination)))
+   (fl #x01 (encode-reg-r/m source destination)))
   (((or memory r32) r32)
-   (list #x66 #x01 (encode-reg-r/m source destination)))
+   (fl #x66 #x01 (encode-reg-r/m source destination)))
   ((r8 (or memory r8))
-   (list #x02 (encode-reg-r/m destination source)))
+   (fl #x02 (encode-reg-r/m destination source)))
   ((r16 (or memory r16))
-   (list #x03 (encode-reg-r/m destination source)))
+   (fl #x03 (encode-reg-r/m destination source)))
   ((r32 (or memory r32))
-   (list #x66 #x03 (encode-reg-r/m destination source))))
+   (fl #x66 #x03 (encode-reg-r/m destination source))))
 
 (define-x86oid-mnemonic lodsb ()
   ;; Loads the string at ds:si into al
@@ -195,8 +201,13 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
   (null (list #x66 #xAD)))
 
 
+(define-x86oid-mnemonic aaa ()
+  ;; invalid in 64bit mode
+  (null #x37))
+
 (defun encode-instruction (name &rest operands)
-  (declare (optimize (speed 3) (safety 3)))
+  (declare (optimize (speed 3) (safety 0))
+           (dynamic-extent operands))
   (apply (the function (nass.instruction::instruction-writer (gethash name +x86-mnemonics+)))
          operands))
 
