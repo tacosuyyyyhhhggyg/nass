@@ -79,7 +79,6 @@ Doing this means reversing the order of the octets.
 
 This is very hackish and really needs to be redone when the generic type
 dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
-  (declare (ignore size))
   ;; Basically as is each "case" for a 16 bit machine is handled vie types
   ;; alone. This makes this one function very long and ugly... but right
   ;; now required if we are to avoid using clos in the assembler.
@@ -125,7 +124,11 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
       (ash (position (the (member :si :di) (register-indirect-register source))
                      '(:si :di))
            (position (the (member :bx :bp) (indirect-base-base source))
-                     '(:bx :bp)))))))
+                     '(:bx :bp)))))
+    ((cons (or indirect-base displacement
+               indirect-displacement register-indirect
+               indirect-base-displacement))
+     (encode-reg-r/m source destination size))))
 
 ;;; mnemonics
 (define-x86oid-mnemonic nop ()
@@ -151,7 +154,19 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
   ((immediate-octet) (list #xCD immediate)))
 
 (define-x86oid-mnemonic add (destination source)
-  (((member :al) immediate-octet) (list #x04 source)))
+  (((member :al) immediate-octet) (list #x04 source))
+  (((or memory r8) r8)
+   (list #x00 (encode-reg-r/m source destination)))
+  (((or memory r16) r16)
+   (list #x01 (encode-reg-r/m source destination)))
+  (((or memory r32) r32)
+   (list #x66 #x01 (encode-reg-r/m source destination)))
+  ((r8 (or memory r8))
+   (list #x02 (encode-reg-r/m destination source)))
+  ((r16 (or memory r16))
+   (list #x03 (encode-reg-r/m destination source)))
+  ((r32 (or memory r32))
+   (list #x66 #x03 (encode-reg-r/m destination source))))
 
 (defun encode-instruction (name &rest operands)
   (declare (optimize (speed 3) (safety 3)))
