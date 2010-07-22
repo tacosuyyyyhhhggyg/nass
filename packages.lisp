@@ -80,7 +80,8 @@ ambigouity from C types to our lisp description."))
            #:mod-rem-r/m-register
            #:segment-override-prefix-codes
            #:x86-register
-           #:immediate))
+           #:immediate
+           #:immediate-octet))
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)

@@ -58,4 +58,9 @@ Segment names are cs ss ds es fs gs."
   '(or r8 r16 r32 r64))
 
 (deftype immediate ()
-  '(not (or symbol keyword)))
+  '(and (not (or symbol keyword))))
+
+(deftype immediate-octet (&optional (size 1))
+  `(and immediate (nutils:octet ,size)))
+
+;;; END
