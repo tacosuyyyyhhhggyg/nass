@@ -9,7 +9,16 @@
 (defparameter +spec-types+
   (nutils:plist-hash-table
    `(:E gpr-or-memory
-        :G gpr))
+     :G gpr
+     :I immediate-octet
+     :M memory
+     :R gpr
+     :S segment-register
+     :U xmm
+     :V xmm
+     :W xmm
+     :Z gpr)
+   :test #'equal)
   "Used for type lookup from spec to lisp types.")
 
 (defun integer->little-octets (integer &key vectorp
@@ -183,6 +192,7 @@ Shortcut function that is inlined as we use this often."
   (declare (optimize (speed 3) (safety 0)))
   (nutils:flatten args))
 
+;;; Defined for #x00 #x01 #x02 #x03
 (define-x86oid-mnemonic add (destination source)
   (((member :al) immediate-octet) (list #x04 source))
   (((or memory r8) r8)
@@ -197,6 +207,14 @@ Shortcut function that is inlined as we use this often."
    (fl #x03 (encode-reg-r/m destination source)))
   ((r32 (or memory r32))
    (fl #x66 #x03 (encode-reg-r/m destination source))))
+
+;;; What I want to write
+#+ ()
+(define-x86oid-mnemonic add (destination source)
+  (defop (#x00) (:E :b) (:g :b))
+  (defop (#x01) (:E :v) (:G :v))
+  (defop (#x02) (:G :b) (:E :b))
+  (defop (#x03) (:G :v) (:E :v)))
 
 (define-x86oid-mnemonic lodsb ()
   ;; Loads the string at ds:si into al

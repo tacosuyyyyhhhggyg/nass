@@ -17,13 +17,16 @@
   '(member :rax :rcx :rdx :rbx :rsp :rbp :rsi :rdi
     :r8 :r9 :r10 :r11 :r12 :r13 :r14 :r15))
 
-(deftype mm ()
+(deftype mm (&optional criteria)
+  (declare (ignore criteria))
   '(member :mm0 :mm1 :mm2 :mm3 :mm4 :mm5 :mm6 :mm7))
 
-(deftype xmm ()
+(deftype xmm (&optional criteria)
+  (declare (ignore criteria))
   '(member :xmm0 :xmm1 :xmm2 :xmm3 :xmm4 :xmm5 :xmm6 :xmm7))
 
-(deftype segment-register ()
+(deftype segment-register (&optional criteria)
+  (declare (ignore criteria))
   "sreg: Segment register names."
   '(member :es :cs :ss :ds :fs :gs))
 
@@ -34,9 +37,9 @@
   "x87 operates with a stack, not directly addressable registers."
   '(member :st0 :st1 :st2 :st3 :st4 :st5 :st6 :st7))
 
-(deftype mod-rem-r/m-register ()
+(deftype mod-rem-r/m-register (&optional criteria)
   "All valid x86oid register names."
-  '(or r8 r16 r32 r64 mm xmm segment-register eee x87-stack-register
+  `(or (x86-register ,criteria) mm xmm segment-register eee x87-stack-register
     ;; FIXME: These below should become their own subtypes
     (member :r8b :r9b :r10b :r11b :r12b :r13b :r14b :r15b
      :r8w :r9w :r10w :r11w :r12w :r13w :r14w :r15w
@@ -91,8 +94,13 @@ Segment names are cs ss ds es fs gs."
   "Octets that can appear before the primary opcode."
   '(or segment-override-prefix-codes (member #x66 #x67)))
 
-(deftype x86-register ()
-  '(or r8 r16 r32 r64))
+(deftype x86-register (&optional criteria)
+  (case criteria
+    (8 'r8)
+    (16 'r16)
+    (32 'r16)
+    (64 'r64)
+    (otherwise '(or r8 r16 r32 r64))))
 
 (deftype immediate ()
   '(and (not (or symbol keyword))))
@@ -100,19 +108,20 @@ Segment names are cs ss ds es fs gs."
 (deftype immediate-octet (&optional (size 1))
   `(and immediate (nutils:octet ,size)))
 
-(deftype general-purpose-register ()
+(deftype general-purpose-register (&optional criteria)
   "Any valid general purpose register."
-  'mod-rem-r/m-register)
+  `(mod-rem-r/m-register ,criteria))
 
-(deftype gpr ()
+(deftype gpr (&optional criteria)
   "Short for `general-purpose-register'."
-  'general-purpose-register)
+  `(general-purpose-register ,criteria))
 
-(deftype memory ()
+(deftype memory (&optional criteria)
   "valid memory locations only."
+  (declare (ignore criteria))
   '(or displacement indirect-displacement indirect-base-displacement
     register-indirect indirect-base))
 
-(deftype gpr-or-memory ()
-  '(or gpr memory))
+(deftype gpr-or-memory (&optional criteria)
+  `(or (gpr ,criteria) (memory ,criteria)))
 ;;; END
