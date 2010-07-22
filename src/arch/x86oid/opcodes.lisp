@@ -75,12 +75,88 @@ will return the correct bit sequence as an integer.")
                       ,lambdalist ,@types-action)
           )))
 
+;;; mod-reg-r/m stuff
+(defun reg-reg (destination source)
+  (declare (mod-rem-r/m-register destination source))
+  (logior #xC0
+          (ash (encode-reg-bits source) 3)
+          (encode-reg-bits destination)))
+
 (defun encode-reg-bits (reg-name)
   "Compute 3 bit number corresponding to REG-NAME."
   (declare (nass.x86oid.types::mod-rem-r/m-register reg-name)
            (optimize (speed 3) (space 0)))
   (mod (position reg-name (the simple-vector +register-list+)) 8))
 
+(defun encode-displacement (displacement size)
+  "Compute x86 DISPLACEMENT of SIZE.
+
+Doing this means reversing the order of the octets.
+   #xFF01 => #x01FF."
+  (declare ((nass.types:octet 4) displacement)
+           ((member 8 16 32) size))
+  (let ((size (1- (ash size -3))))
+    (loop for i from size downto 0
+       for opp from 0 to size
+       summing (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))
+       do (print (list i opp (* i 8) (ldb (byte 4 (* i 8)) displacement)
+                       (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))))
+       )))
+
+(defun encode-reg-r/m (destination source &optional (size 16))
+  "Create the encode-reg-r/m byte for a 16 bit machine.
+
+This is very hackish and really needs to be redone when the generic type
+dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
+  (declare (ignore size))
+  ;; Basically as is each "case" for a 16 bit machine is handled vie types
+  ;; alone. This makes this one function very long and ugly... but right
+  ;; now required if we are to avoid using clos in the assembler.
+  (etypecase (cons destination source)
+    ((cons mod-rem-r/m-register mod-rem-r/m-register)
+     ;; Example:: ADD ax, ax
+     (reg-reg destination source))
+    ((cons mod-rem-r/m-register displacement)
+     (let ((result 0))
+       (setf (ldb (byte 3 19) result) (encode-reg-bits destination))
+       (setf (ldb (byte 3 16) result) #b110)
+       #+ () (setf (ldb (byte 8 16) result)
+                   (encode-displacement (displacement-location source) size))))
+    ((cons (or r8 r16 r32 mm xmm eee segment-register) register-indirect)
+     (logior #x00
+             (ash (encode-reg-bits destination) 3)
+             (+ 4 (position (register-indirect-register source)
+                            #(:si :di :bp :bx)))))
+    ((cons (or r8 r16 r32 mm xmm eee segment-register)
+           indirect-displacement)
+     ;; example:: ADD [bx+1), al
+     (logior
+      (if (> (indirect-displacement-location source) #xFF)
+          #b10000000
+          #b01000000)
+      (ash (encode-reg-bits destination) 3)
+      (+ 4 (position (register-indirect-register source)
+                     #(:si :di :bp :bx)))))
+    ((cons (or r8 r16 r32 mm xmm eee segment-register) indirect-base)
+     (logior
+      (ash (encode-reg-bits destination) 3)
+      (ash (position (the (member :si :di) (register-indirect-register source))
+                     '(:si :di))
+           (position (the (member :bx :bp) (indirect-base-base source))
+                     '(:bx :bp)))))
+    ((cons (or r8 r16 r32 mm xmm eee segment-register)
+           indirect-base-displacement)
+     (logior
+      (if (> (indirect-base-displacement-location source) #xFF)
+          #b10000000
+          #b01000000)
+      (ash (encode-reg-bits destination) 3)
+      (ash (position (the (member :si :di) (register-indirect-register source))
+                     '(:si :di))
+           (position (the (member :bx :bp) (indirect-base-base source))
+                     '(:bx :bp)))))))
+
+;;; mnemonics
 (define-x86oid-mnemonic nop ()
   (null (list #x90)))
 
