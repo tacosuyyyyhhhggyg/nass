@@ -113,4 +113,6 @@ Segment names are cs ss ds es fs gs."
   '(or displacement indirect-displacement indirect-base-displacement
     register-indirect indirect-base))
 
+(deftype gpr-or-memory ()
+  '(or gpr memory))
 ;;; END
