@@ -161,74 +161,6 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
                indirect-base-displacement))
      (encode-reg-r/m source destination size))))
 
-;;; mnemonics
-(define-x86oid-mnemonic nop ()
-  (null (list #x90)))
-
-(define-x86oid-mnemonic dec (op1)
-  ((r16) (list (logior #x48 (encode-reg-bits op1))))
-  ((r32) (list #x66 (logior #x48 (encode-reg-bits op1)))))
-
-(define-x86oid-mnemonic inc (op1)
-  ((r16) (list (logior #x40 (encode-reg-bits op1))))
-  ((r32) (list #x66 (logior #x40 (encode-reg-bits op1)))))
-
-(define-x86oid-mnemonic push (op1)
-  ((r16) (list (logior #x50 (encode-reg-bits op1))))
-  ((r32) (list #x66 (logior #x50 (encode-reg-bits op1)))))
-
-(define-x86oid-mnemonic pop (op1)
-  ((r16) (list (logior #x58 (encode-reg-bits op1))))
-  ((r32) (list #x66 (logior #x58 (encode-reg-bits op1)))))
-
-(define-x86oid-mnemonic int (immediate)
-  ((immediate-octet) (list #xCD immediate)))
-
-(declaim (inline fl))
-(defun fl (&rest args)
-  "(F)latten (L)ist of ARGS.
-
-Shortcut function that is inlined as we use this often."
-  (declare (optimize (speed 3) (safety 0)))
-  (nutils:flatten args))
-
-;;; Defined for #x00 #x01 #x02 #x03
-(define-x86oid-mnemonic add (destination source)
-  (((member :al) immediate-octet) (list #x04 source))
-  (((or memory r8) r8)
-   (fl #x00 (encode-reg-r/m source destination)))
-  (((or memory r16) r16)
-   (fl #x01 (encode-reg-r/m source destination)))
-  (((or memory r32) r32)
-   (fl #x66 #x01 (encode-reg-r/m source destination)))
-  ((r8 (or memory r8))
-   (fl #x02 (encode-reg-r/m destination source)))
-  ((r16 (or memory r16))
-   (fl #x03 (encode-reg-r/m destination source)))
-  ((r32 (or memory r32))
-   (fl #x66 #x03 (encode-reg-r/m destination source))))
-
-;;; What I want to write
-#+ ()
-(define-x86oid-mnemonic add (destination source)
-  (defop (#x00) (:E :b) (:g :b))
-  (defop (#x01) (:E :v) (:G :v))
-  (defop (#x02) (:G :b) (:E :b))
-  (defop (#x03) (:G :v) (:E :v)))
-
-(define-x86oid-mnemonic lodsb ()
-  ;; Loads the string at ds:si into al
-  (null (list #xac)))
-(define-x86oid-mnemonic lodsw ()
-  (null (list #xad)))
-(define-x86oid-mnemonic lodsd ()
-  (null (list #x66 #xAD)))
-
-
-(define-x86oid-mnemonic aaa ()
-  ;; invalid in 64bit mode
-  (null #x37))
-
 (defun encode-instruction (name &rest operands)
   (declare (optimize (speed 3) (safety 0))
            (dynamic-extent operands))
@@ -241,4 +173,7 @@ Shortcut function that is inlined as we use this often."
     (:x86oid `(list ,@(mapcar (lambda (instruction)
                         `(nass.x86oid.opcodes::encode-instruction ,(nutils:make-keyword (car instruction)) ,@(cdr instruction)))
                       body)))))
+
+
+
 

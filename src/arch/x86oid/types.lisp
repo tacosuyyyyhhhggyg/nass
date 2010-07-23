@@ -108,6 +108,9 @@ Segment names are cs ss ds es fs gs."
 (deftype immediate-octet (&optional (size 1))
   `(and immediate (nutils:octet ,size)))
 
+(deftype immediate-xoctet (&optional (size 1))
+  `(and immediate (or (nutils:octet ,size) (nutils:signed-octet ,size))))
+
 (deftype general-purpose-register (&optional criteria)
   "Any valid general purpose register."
   `(mod-rem-r/m-register ,criteria))

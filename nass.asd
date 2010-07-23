@@ -27,7 +27,8 @@
                                 :components
                                 (;(:file "mod-reg-rm-types")
                                  (:file "types")
-                                 (:file "opcodes" :depends-on ("types"))))
+                                 (:file "opcodes" :depends-on ("types"))
+                                 (:file "mnemonic" :depends-on ("opcodes"))))
                        (:module :i8086
                                 :components
                                 ((:file "init-i8086")))))))

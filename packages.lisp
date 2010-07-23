@@ -101,7 +101,8 @@ ambigouity from C types to our lisp description."))
            #:make-indirect-displacement
            #:make-indirect-base-displacement
            #:displacement-location
-           #:gpr-or-memory))
+           #:gpr-or-memory
+           #:immediate-xoctet))
 (defpackage #:nass.arch.x86oids
   (:use :cl :nutils :eos :binary-data :nass.abstract
         :nass.global-state)
