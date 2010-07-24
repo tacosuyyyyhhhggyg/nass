@@ -1,5 +1,5 @@
 (asdf:defsystem :nass
-  :depends-on (:nutils :eos :flexi-streams :binary-data :trivial-shell)
+  :depends-on (:nutils :eos :with-fbound :flexi-streams :binary-data :trivial-shell)
   :serial t
   :components
   ((:file "packages")
@@ -32,4 +32,6 @@
                        (:module :i8086
                                 :components
                                 ((:file "init-i8086")))))))
-   (:file "nass")))
+   (:file "nass")
+   (:module #:test
+            ((:file "x86-opcodes")))))
