@@ -94,20 +94,6 @@ r32 for 32bit mode."
            (optimize (speed 3) (safety 1)))
   (mod (position reg-name (the simple-vector +register-list+)) 8))
 
-(defun encode-displacement (displacement size)
-  "Compute x86 DISPLACEMENT of SIZE.
-
-Doing this means reversing the order of the octets.
-   #xFF01 => #x01FF."
-  (declare ((nass.types:octet 4) displacement)
-           ((member 8 16 32) size))
-  (let ((size (1- (ash size -3))))
-    (loop for i from size downto 0
-       for opp from 0 to size
-       collecting (ldb (byte 8 (* i 8)) displacement)
-;       do (print (list i opp (* i 8) (ldb (byte 4 (* i 8)) displacement)
- ;                      (ash (ldb (byte 8 (* i 8)) displacement) (* opp 8))))
-       )))
 
 (defun encode-reg-r/m (destination source &optional (size 16))
   "Create the encode-reg-r/m byte for a 16 bit machine.
@@ -124,7 +110,7 @@ dispatch system is complete. -- Nixeagle [2010-07-22 Thu 01:44]"
      (reg-reg destination source))
     ((cons mod-rem-r/m-register displacement)
      (cons (logior #b00110000 (encode-reg-bits destination))
-           (encode-displacement (displacement-location source) size)))
+           (integer->little-octets (displacement-location source) :size size)))
     ((cons (or r8 r16 r32 mm xmm eee segment-register) register-indirect)
      (logior #x00
              (ash (encode-reg-bits destination) 3)
