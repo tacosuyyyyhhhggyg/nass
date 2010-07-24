@@ -25,6 +25,7 @@
                                (size (ceiling (log (1+ integer) 256))))
   "Convert an INTEGER to a list of octets in little endian order."
   (assert (not vectorp) nil "VECTORP not implemented yet.")
+  (check-type size nutils:positive-fixnum)
   (loop for i from 0 to (1- size)
        collect (ldb (byte 8 (* 8 i)) integer)))
 
@@ -81,6 +82,7 @@ r32 for 32bit mode."
 
 ;;; mod-reg-r/m stuff
 (defun reg-reg (destination source)
+  "Encodes reg-reg octet when DESTINATION and SOURCE are `gpr's."
   (declare (mod-rem-r/m-register destination source))
   (logior #xC0
           (ash (encode-reg-bits source) 3)
@@ -89,7 +91,7 @@ r32 for 32bit mode."
 (defun encode-reg-bits (reg-name)
   "Compute 3 bit number corresponding to REG-NAME."
   (declare (nass.x86oid.types::mod-rem-r/m-register reg-name)
-           (optimize (speed 3) (space 0)))
+           (optimize (speed 3) (safety 1)))
   (mod (position reg-name (the simple-vector +register-list+)) 8))
 
 (defun encode-displacement (displacement size)
