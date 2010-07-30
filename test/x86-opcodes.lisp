@@ -16,7 +16,7 @@
     (256 :size 4) => '(0 1 0 0)
     (0 :size 0) :signals simple-type-error
     "Vectorp is not yet implemented, so should error."
-    (0 :vectorp t) :signals error ))
+    (0 :vectorp t) :signals error))
 
 (test (encode-reg-bits :suite root)
   (with-fbound (nass.x86oid.opcodes::encode-reg-bits)
@@ -24,7 +24,7 @@
     (:eax) => 0
     (:al) => 0
     (:r15d) => 7
-    (1) :signals type-error)
+    (1) => :signals type-error)
   (is (zerop (mod (length nass.x86oid.opcodes::+register-list+) 8))))
 
 (test (reg-reg :suite root)
@@ -38,4 +38,11 @@
                "reg1: ~A reg2: ~A result: ~X"
                reg1 reg2 (nass.x86oid.opcodes::reg-reg reg1 reg2))))))
 
+(test (spec-type-v-p :suite root)
+  (with-fbound (nass.x86oid.opcodes::spec-type-v-p)
+    ;; What is the right syntax for this? Trailing pred with no extra
+    ;; arguments? Some sort of wrapping thing around the arg list like
+    ;; (satisfies ('((:a . :e)))), but that just looks ugly and is easily
+    ;; confused with the existing :satisfies ... stuff we already have.
+    ('((:a . :e))) :pred))
 ;;; END

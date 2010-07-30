@@ -34,4 +34,5 @@
                                 ((:file "init-i8086")))))))
    (:file "nass")
    (:module #:test
+            :components
             ((:file "x86-opcodes")))))
