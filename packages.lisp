@@ -65,7 +65,9 @@ ambigouity from C types to our lisp description."))
 
 (defpackage #:nass.instruction
   (:use :cl :nutils.assert)
-  (:shadow #:variable))
+  (:shadow #:variable)
+  (:export #:make-label
+           #:make-variable))
 
 (defpackage #:nass.x86oid.types
   (:use :cl)
@@ -135,10 +137,15 @@ ambigouity from C types to our lisp description."))
 (defpackage #:nass.elf
   (:use :cl :nass.util :eos))
 
+(defpackage #:nass.asm
+  (:use :cl :nass.instruction)
+  (:export #:asm))
+
 (defpackage #:nass.goof
   (:use :cl :eos :nutils :binary-data))
 
 (defpackage #:nass.general
   (:use :cl :nutils :binary-data))
+
 
 ;;; END
