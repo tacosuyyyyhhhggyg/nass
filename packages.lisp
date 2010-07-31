@@ -64,7 +64,8 @@ ambigouity from C types to our lisp description."))
            #:define-assembly-class))
 
 (defpackage #:nass.instruction
-  (:use :cl :nutils.assert))
+  (:use :cl :nutils.assert)
+  (:shadow #:variable))
 
 (defpackage #:nass.x86oid.types
   (:use :cl)

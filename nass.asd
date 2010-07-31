@@ -14,7 +14,8 @@
             :components
             ((:file "global-state")
              (:file "c-types")
-             (:file "instruction")
+             (:file "intermediate-asm")
+             (:file "instruction" :depends-on ("intermediate-asm"))
             ; (:file "abstract")
              (:module :arch
                       :depends-on ("instruction")
